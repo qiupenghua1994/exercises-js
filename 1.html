@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<button onclick="test()">日志在控制台</button>
+<script type="text/javascript">
+    function test() {
+        /**
+         * 题目：从1-20 中取出两个数，两个数只和告诉A，之乘积告诉B。
+         * A说我不知道这两个数，B说我也不知道。
+         * 这时候A说我知道了，B说我也知道了。
+         * 求这两个数
+         */
+        var arr = [];
+        for (let i = 0; i < 20; i++) {
+            arr[i] = i + 1;
+        }
+        /**
+         * 两个数只和告诉A
+         * 所有求和的组合
+         */
+        var sumObj = {};
+        for (let i = 1; i < 20; i++) {
+            for (let j = i + 1; j <= 20; j++) {
+                let sum = i + j;
+                if (sumObj[sum] === undefined) {
+                    sumObj[sum] = [[i, j]];
+                } else {
+                    sumObj[sum].push([i, j])
+                }
+            }
+        }
+
+        console.log("所有求和的组合：",JSON.parse(JSON.stringify(sumObj)));
+
+        /**
+         * 之乘积告诉B
+         * 所有乘积的组合
+         */
+        var multiplyObj = {};
+        for (let i = 1; i < 20; i++) {
+            for (let j = i + 1; j <= 20; j++) {
+                let sum = i * j;
+                if (multiplyObj[sum] === undefined) {
+                    multiplyObj[sum] = [[i, j]];
+                } else {
+                    multiplyObj[sum].push([i, j])
+                }
+            }
+        }
+        console.log("所有乘积的组合:",JSON.parse(JSON.stringify(multiplyObj)));
+
+        /**
+         * A说我不知道这两个数，B说我也不知道
+         * 当求和的说我不知道的时候
+         * 乘积方可知：
+         * 1、求和结果有多个
+         * 行为：
+         * 所以从乘积中去除 求和结果只有一个的项
+         */
+        Object.keys(sumObj).forEach(function (item) {
+            if (sumObj[item].length ===1) {
+                let t = sumObj[item][0].toString();
+
+                Object.keys(multiplyObj).forEach(function (item) {
+                    for (var i=0,len=multiplyObj[item].length;i<len;i++){
+                        if(multiplyObj[item][i].toString() ===t){
+                            delete multiplyObj[item];
+                            return
+                        }
+                    }
+                });
+            }
+        });
+        /**
+         * 这时候A说我知道了
+         * 求和方可知：
+         * 1、乘积结果有多个
+         * 2、乘积结果对应的求和结果有多个
+         * 以上条件求和方知道了答案 推断：
+         * 1、求和结果存在且只有一项结果的乘积有多个解
+         *
+         * 在 sumObj 中寻找 其中一个或者多个结果对应的乘积只有一种解的项，但只有一个结果对应的乘积有多个解的项
+         */
+
+        console.log('结果可能列表');
+        Object.keys(sumObj).forEach(function (item) {
+            let sumItem = sumObj[item];
+            let oneFlag = 0;
+            let moreFlag = 0;
+            let moreArr = [];
+            for (let i in sumItem){
+                if(!sumItem.hasOwnProperty(i)){
+                    return
+                }
+                let j = sumItem[i];
+                if(!multiplyObj[j[0]*j[1]]){
+                    delete  sumObj[item];
+                    return
+                }
+                if(multiplyObj[j[0]*j[1]].length<2){
+                    oneFlag++
+                }else{
+                    moreArr = [j[0],j[1]];
+                    moreFlag++;
+                }
+            }
+            if(moreFlag===1&& oneFlag>0){
+                console.log(moreArr)
+            }else{
+                delete sumObj[item]
+            }
+        });
+        console.log('--包含结果的求和集合--',JSON.parse(JSON.stringify(sumObj)));
+
+        /**
+         * A、B 就可以从筛选列表中 得知结果
+         */
+    }
+</script>
+</body>
+</html>
